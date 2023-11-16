@@ -1,131 +1,138 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import React from 'react';
-import { TaskList } from '../../components/TaskList';
+import { render, fireEvent } from "@testing-library/react";
+import { TaskList } from "../../components/TaskList";
 
-describe('App Page', () => {
-  it('should be able to add a task', async () => {
-    render(<TaskList />);
+describe("Given <TaskList /> component", () => {
+  describe("When render the component is rendered", () => {
+    it("Should be able to add a task", async () => {
+      const { getByTestId, getByPlaceholderText, getByText } = render(
+        <TaskList />
+      );
 
-    const taskInput = screen.getByPlaceholderText('Adicionar novo todo');
-    const addTaskButton = screen.getByTestId('add-task-button');
+      const TaskInput = getByPlaceholderText("Adicionar novo todo");
+      const AddTaskButton = getByTestId("add-task-button");
 
-    fireEvent.change(taskInput, {
-      target: {
-        value: 'Desafio ReactJS Ignite'
-      }
+      fireEvent.change(TaskInput, {
+        target: {
+          value: "Desafio ReactJS Ignite",
+        },
+      });
+      fireEvent.click(AddTaskButton);
+
+      const AddedFirstTaskTitle = getByText("Desafio ReactJS Ignite");
+
+      expect(AddedFirstTaskTitle).toHaveTextContent("Desafio ReactJS Ignite");
+      expect(AddedFirstTaskTitle.parentElement).not.toHaveClass("completed");
+
+      fireEvent.change(TaskInput, {
+        target: {
+          value: "Beber água",
+        },
+      });
+      fireEvent.click(AddTaskButton);
+
+      const addedSecondTaskTitle = getByText("Beber água");
+
+      expect(AddedFirstTaskTitle).toBeInTheDocument();
+      expect(AddedFirstTaskTitle).toHaveTextContent("Desafio ReactJS Ignite");
+      expect(AddedFirstTaskTitle.parentElement).not.toHaveClass("completed");
+
+      expect(addedSecondTaskTitle).toHaveTextContent("Beber água");
+      expect(addedSecondTaskTitle.parentElement).not.toHaveClass("completed");
     });
-    fireEvent.click(addTaskButton);
 
-    const addedFirstTaskTitle = screen.getByText('Desafio ReactJS Ignite');
+    it("Should not be able to add a task with a empty title", () => {
+      const { getByTestId, getByText, queryByTestId, getByPlaceholderText } =
+        render(<TaskList />);
 
-    expect(addedFirstTaskTitle).toHaveTextContent('Desafio ReactJS Ignite');
-    expect(addedFirstTaskTitle.parentElement).not.toHaveClass('completed')
+      const AddTaskButton = getByTestId("add-task-button");
 
-    fireEvent.change(taskInput, {
-      target: {
-        value: 'Beber água'
-      }
+      fireEvent.click(AddTaskButton);
+
+      expect(queryByTestId("task")).not.toBeInTheDocument();
+
+      const TaskInput = getByPlaceholderText("Adicionar novo todo");
+
+      fireEvent.change(TaskInput, {
+        target: {
+          value: "Desafio ReactJS Ignite",
+        },
+      });
+
+      fireEvent.click(AddTaskButton);
+
+      const AddedFirstTaskTitle = getByText("Desafio ReactJS Ignite");
+
+      expect(AddedFirstTaskTitle).toHaveTextContent("Desafio ReactJS Ignite");
     });
-    fireEvent.click(addTaskButton);
 
-    const addedSecondTaskTitle = screen.getByText('Beber água');
+    it("Should be able to remove a task", async () => {
+      const { getByTestId, getByPlaceholderText, getAllByTestId, getByText } =
+        render(<TaskList />);
 
-    expect(addedFirstTaskTitle).toBeInTheDocument();
-    expect(addedFirstTaskTitle).toHaveTextContent('Desafio ReactJS Ignite');
-    expect(addedFirstTaskTitle.parentElement).not.toHaveClass('completed')
+      const TaskInput = getByPlaceholderText("Adicionar novo todo");
+      const AddTaskButton = getByTestId("add-task-button");
 
-    expect(addedSecondTaskTitle).toHaveTextContent('Beber água');
-    expect(addedSecondTaskTitle.parentElement).not.toHaveClass('completed')
-  })
+      fireEvent.change(TaskInput, {
+        target: {
+          value: "Desafio ReactJS Ignite",
+        },
+      });
+      fireEvent.click(AddTaskButton);
 
-  it('should not be able to add a task with a empty title', () => {
-    render(<TaskList />);
+      fireEvent.change(TaskInput, {
+        target: {
+          value: "Beber água",
+        },
+      });
+      fireEvent.click(AddTaskButton);
 
-    const addTaskButton = screen.getByTestId('add-task-button');
+      const AddedFirstTaskTitle = getByText("Desafio ReactJS Ignite");
+      const addedSecondTaskTitle = getByText("Beber água");
 
-    fireEvent.click(addTaskButton);
+      expect(AddedFirstTaskTitle).toBeInTheDocument();
+      expect(addedSecondTaskTitle).toBeInTheDocument();
 
-    expect(screen.queryByTestId('task')).not.toBeInTheDocument();
+      const [addedFirstTaskRemoveButton] = getAllByTestId("remove-task-button");
 
-    const taskInput = screen.getByPlaceholderText('Adicionar novo todo');
+      fireEvent.click(addedFirstTaskRemoveButton);
 
-    fireEvent.change(taskInput, {
-      target: {
-        value: 'Desafio ReactJS Ignite'
-      }
+      expect(AddedFirstTaskTitle).not.toBeInTheDocument();
+      expect(addedSecondTaskTitle).toBeInTheDocument();
     });
-    
-    fireEvent.click(addTaskButton);
 
-    const addedFirstTaskTitle = screen.getByText('Desafio ReactJS Ignite');
+    it("Should be able to check a task", () => {
+      const { getByTestId, getByPlaceholderText, getAllByTestId } = render(
+        <TaskList />
+      );
 
-    expect(addedFirstTaskTitle).toHaveTextContent('Desafio ReactJS Ignite');
-  })
+      const TaskInput = getByPlaceholderText("Adicionar novo todo");
+      const AddTaskButton = getByTestId("add-task-button");
 
-  it('should be able to remove a task', async () => {
-    render(<TaskList />);
+      fireEvent.change(TaskInput, {
+        target: {
+          value: "Desafio ReactJS Ignite",
+        },
+      });
+      fireEvent.click(AddTaskButton);
 
-    const taskInput = screen.getByPlaceholderText('Adicionar novo todo');
-    const addTaskButton = screen.getByTestId('add-task-button');
+      fireEvent.change(TaskInput, {
+        target: {
+          value: "Beber água",
+        },
+      });
+      fireEvent.click(AddTaskButton);
 
-    fireEvent.change(taskInput, {
-      target: {
-        value: 'Desafio ReactJS Ignite'
+      const [addedFirstTask, addedSecondTask] = getAllByTestId("task");
+
+      if (addedFirstTask.firstChild) {
+        fireEvent.click(addedFirstTask.firstChild);
       }
+
+      expect(addedFirstTask).toBeInTheDocument();
+      expect(addedFirstTask).toHaveClass("completed");
+
+      expect(addedSecondTask).toBeInTheDocument();
+      expect(addedSecondTask).not.toHaveClass("completed");
     });
-    fireEvent.click(addTaskButton);
-
-    fireEvent.change(taskInput, {
-      target: {
-        value: 'Beber água'
-      }
-    });
-    fireEvent.click(addTaskButton);
-
-    const addedFirstTaskTitle = screen.getByText('Desafio ReactJS Ignite');
-    const addedSecondTaskTitle = screen.getByText('Beber água');
-
-    expect(addedFirstTaskTitle).toBeInTheDocument()
-    expect(addedSecondTaskTitle).toBeInTheDocument();
-
-    const [addedFirstTaskRemoveButton] = screen.getAllByTestId('remove-task-button');
-
-    fireEvent.click(addedFirstTaskRemoveButton);
-
-    expect(addedFirstTaskTitle).not.toBeInTheDocument();
-    expect(addedSecondTaskTitle).toBeInTheDocument();
-  })
-
-  it('should be able to check a task', () => {
-    render(<TaskList />);
-
-    const taskInput = screen.getByPlaceholderText('Adicionar novo todo');
-    const addTaskButton = screen.getByTestId('add-task-button');
-
-    fireEvent.change(taskInput, {
-      target: {
-        value: 'Desafio ReactJS Ignite'
-      }
-    });
-    fireEvent.click(addTaskButton);
-
-    fireEvent.change(taskInput, {
-      target: {
-        value: 'Beber água'
-      }
-    });
-    fireEvent.click(addTaskButton);
-
-    const [addedFirstTask, addedSecondTask] = screen.getAllByTestId('task');
-
-    if (addedFirstTask.firstChild) {
-      fireEvent.click(addedFirstTask.firstChild)
-    }
-
-    expect(addedFirstTask).toBeInTheDocument();
-    expect(addedFirstTask).toHaveClass('completed');
-
-    expect(addedSecondTask).toBeInTheDocument();
-    expect(addedSecondTask).not.toHaveClass('completed');
-  })
-})
+  });
+});
